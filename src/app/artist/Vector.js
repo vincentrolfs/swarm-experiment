@@ -1,11 +1,10 @@
-import {ARENA_RADIUS, CIRCLE_RADIUS} from "../../utils/constants";
-import {CENTER} from "./Artist";
+import {ARENA_RADIUS, CENTER} from "../../utils/constants";
 
 export class Vector {
     constructor(x, y) {
-        if ( (x === undefined) || (y === undefined) ){
-            this.x = Math.random();
-            this.y = Math.random();
+        if ((x === undefined) || (y === undefined)) {
+            this.x = Math.random() - 0.5;
+            this.y = Math.random() - 0.5;
             const factor = ARENA_RADIUS * Math.random() / this.magnitude();
 
             this.x *= factor;
@@ -17,12 +16,6 @@ export class Vector {
             this.x = x;
             this.y = y;
         }
-    }
-
-    drawCircle(ctx) {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, CIRCLE_RADIUS, 0, 2 * Math.PI, false);
-        ctx.fill();
     }
 
     add(pos2) {
