@@ -1,4 +1,7 @@
 import {Vector} from "./Vector";
+import {ARENA_RADIUS, CANVAS_HEIGHT, CANVAS_WIDTH, CIRCLE_RADIUS} from "../../utils/constants";
+
+export const CENTER = new Vector(CANVAS_WIDTH / 2.0, CANVAS_HEIGHT / 2.0);
 
 export class Artist {
     constructor(canvas){
@@ -19,6 +22,10 @@ export class Artist {
 
     drawAgents(){
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.ctx.beginPath();
+        this.ctx.arc(CENTER.x, CENTER.y, ARENA_RADIUS, 0, 2 * Math.PI, false);
+        this.ctx.stroke();
 
         for (let i = 0; i < this.positions.length; i++){
             this.positions[i].drawCircle(this.ctx);
@@ -41,6 +48,8 @@ export class Artist {
 
     findNewPosition(myPosition, partnerPosition, goalDistance){
         const directionMultiplier = this.findDirectionMultiplier(myPosition, partnerPosition, goalDistance);
+        if (directionMultiplier === 0){ return myPosition; }
+
         const direction = partnerPosition.subtract(myPosition).multiply(directionMultiplier);
 
         return myPosition.moveUniform(direction);
