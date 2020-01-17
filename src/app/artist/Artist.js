@@ -20,15 +20,39 @@ export class Artist {
 
     initBehaviours(){
         const amount = 10;
+        const partners = this._get_permutation(amount);
 
         for (let i = 0; i < amount; i++){
             // const partner = (i+1) % amount;
-            let partner;
+            let partner = partners[i];
             do { partner = Math.floor(Math.random() * amount); } while (partner === i);
             const rule = Math.random()*4*ARENA_RADIUS - 2*ARENA_RADIUS;
 
             this.behaviours.push([partner, rule])
         }
+    }
+
+    _get_permutation(length) {
+        var permutation = [...Array(length).keys()],
+            result = [permutation.slice()],
+            c = new Array(length).fill(0),
+            i = 1, k, p;
+
+        while (i < length) {
+            if (c[i] < i) {
+                k = i % 2 && c[i];
+                p = permutation[i];
+                permutation[i] = permutation[k];
+                permutation[k] = p;
+                ++c[i];
+                i = 1;
+                result.push(permutation.slice());
+            } else {
+                c[i] = 0;
+                ++i;
+            }
+        }
+        return result;
     }
 
     initPositions(){
