@@ -19,7 +19,7 @@ export class Artist {
     }
 
     initBehaviours(){
-        const amount = 10;
+        const amount = 15;
         const partners = this._get_permutation(amount);
 
         for (let i = 0; i < amount; i++){
@@ -33,26 +33,14 @@ export class Artist {
     }
 
     _get_permutation(length) {
-        var permutation = [...Array(length).keys()],
-            result = [permutation.slice()],
-            c = new Array(length).fill(0),
-            i = 1, k, p;
+        const numbers = [...Array(length).keys()];
 
-        while (i < length) {
-            if (c[i] < i) {
-                k = i % 2 && c[i];
-                p = permutation[i];
-                permutation[i] = permutation[k];
-                permutation[k] = p;
-                ++c[i];
-                i = 1;
-                result.push(permutation.slice());
-            } else {
-                c[i] = 0;
-                ++i;
-            }
+        for (let i = numbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
         }
-        return result;
+
+        return numbers;
     }
 
     initPositions(){
