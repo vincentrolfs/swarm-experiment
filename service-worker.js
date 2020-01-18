@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/swarm-experiment/precache-manifest.ebefc6bc469c0af5ef2bda74ddb97d88.js"
+  "/swarm-experiment/precache-manifest.dd38cf41f8118d4474fa03a7c92f4764.js"
 );
 
 self.addEventListener('message', (event) => {
