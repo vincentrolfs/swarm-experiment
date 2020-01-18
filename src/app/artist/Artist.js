@@ -104,6 +104,7 @@ export class Artist {
 
     updatePositions(){
         const {positions, behaviours} = this;
+        const newPositions = [];
 
         for (let i = 0; i < positions.length; i++){
             if (!behaviours[i]){ continue; }
@@ -113,12 +114,14 @@ export class Artist {
             const goalDistance = behaviours[i][1];
 
             const [newPosition, hasMoved] = this.findNewPosition(myPosition, partnerPosition, goalDistance);
-            positions[i] = newPosition;
+            newPositions[i] = newPosition;
 
             if (!hasMoved){
                 this.updateBehaviour(i);
             }
         }
+
+        this.positions = newPositions;
     }
 
     updateBehaviour(i){
