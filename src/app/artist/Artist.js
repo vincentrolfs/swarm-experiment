@@ -127,7 +127,9 @@ export class Artist {
             const [newPosition, hasMoved] = this.findNewPosition(myPosition, partnerPosition, goalDistance);
             positions[i] = newPosition;
 
-            this.updateBehaviour(i);
+            if (!hasMoved){
+                this.updateBehaviour(i);
+            }
         }
     }
 
