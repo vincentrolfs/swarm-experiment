@@ -15,24 +15,48 @@ export class Artist {
         this.initPositions();
         this.initColors();
 
+        this.movementChangeTimestamps = new Array(this.behaviours.length).fill(0);
+        this.hasMovedLastUpdate = new Array(this.behaviours.length).fill(false);
+        this.loopTimestamp = 1;
+
         this.runLoop();
     }
 
     initBehaviours(){
-        const amount = 15;
-        const partners = this._get_permutation(amount);
+        let amount = parseInt(new URL(window.location.href).searchParams.get('amount'));
+        if (isNaN(amount) || amount <= 1){ amount = 15; }
+        const partners = this._getPermutation(amount);
 
         for (let i = 0; i < amount; i++){
             // const partner = (i+1) % amount;
             let partner = partners[i];
             do { partner = Math.floor(Math.random() * amount); } while (partner === i);
-            const rule = Math.random()*4*ARENA_RADIUS - 2*ARENA_RADIUS;
+            partners[i] = partner;
+            const rule = this.getRandomBehaviourRule();
 
             this.behaviours.push([partner, rule])
         }
+
+        this.logCycles(partners);
     }
 
-    _get_permutation(length) {
+    logCycles(partners) {
+        console.log("Cycles:");
+
+        for (let k = 0; k < partners.length; k++){
+            let arr = [];
+            let val = k;
+            do {
+                if (arr.indexOf(val) !== -1){ arr.push(val); break; }
+                arr.push(val);
+                val = partners[val];
+            } while(val !== k);
+
+            console.log(k, arr);
+        }
+    }
+
+    _getPermutation(length) {
         const numbers = [...Array(length).keys()];
 
         for (let i = numbers.length - 1; i > 0; i--) {
@@ -41,6 +65,10 @@ export class Artist {
         }
 
         return numbers;
+    }
+
+    getRandomBehaviourRule(){
+        return Math.random()*4*ARENA_RADIUS - 2*ARENA_RADIUS;
     }
 
     initPositions(){
@@ -55,6 +83,7 @@ export class Artist {
         setInterval(() => {
             this.draw();
             this.updatePositions();
+            this.loopTimestamp++;
         }, 5)
     }
 
@@ -116,18 +145,30 @@ export class Artist {
             const [newPosition, hasMoved] = this.findNewPosition(myPosition, partnerPosition, goalDistance);
             newPositions[i] = newPosition;
 
-            if (!hasMoved){
-                this.updateBehaviour(i);
-            }
+            this.updateHasMovedLastUpdate(i, hasMoved);
+            this.updateBehaviour(i, hasMoved);
         }
 
         this.positions = newPositions;
     }
 
-    updateBehaviour(i){
-        if (Math.random() <= 0.001){
-            this.behaviours[i][1] = -Math.sign(this.behaviours[i][1]) * Math.random() * 2 * ARENA_RADIUS;
+    updateHasMovedLastUpdate(i, hasMoved) {
+        if (this.hasMovedLastUpdate[i] !== hasMoved){
+            this.movementChangeTimestamps[i] = this.loopTimestamp;
+            this.hasMovedLastUpdate[i] = hasMoved;
         }
+    }
+
+    updateBehaviour(i, hasMoved){
+        const timeDelta = this.loopTimestamp - this.movementChangeTimestamps[i];
+        const n = 10000;
+        const k = n/8;
+        const changeProbability = (Math.exp(timeDelta / k) - Math.exp(1/k))/(Math.exp(n/k) - Math.exp(1/k));
+        if (Math.random() > changeProbability){
+            return;
+        }
+
+        this.behaviours[i][1] = this.getRandomBehaviourRule();
     }
 
     findNewPosition(myPosition, partnerPosition, goalDistance){
@@ -143,8 +184,8 @@ export class Artist {
         const currentDistance = myPosition.distance(partnerPosition);
         const goalDistanceSign = Math.sign(goalDistance);
 
-        if (goalDistanceSign < 0){
-            goalDistance = -2 * ARENA_RADIUS - goalDistance;
+        if (goalDistanceSign > 0){
+            goalDistance = 2 * ARENA_RADIUS - goalDistance;
         }
 
         return (goalDistanceSign * currentDistance > goalDistance)? goalDistanceSign : 0;
