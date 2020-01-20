@@ -28,7 +28,7 @@ export class Artist {
 
     initBehaviours(){
         let amount = parseInt(this.getSearchParameter('amount'));
-        if (isNaN(amount) || amount <= 1){ amount = 15; }
+        if (isNaN(amount) || amount <= 1){ amount = 30; }
         const partners = this._getPermutation(amount);
 
         for (let i = 0; i < amount; i++){
