@@ -22,8 +22,12 @@ export class Artist {
         this.runLoop();
     }
 
+    getSearchParameter(name){
+        return new URL(window.location.href).searchParams.get(name);
+    }
+
     initBehaviours(){
-        let amount = parseInt(new URL(window.location.href).searchParams.get('amount'));
+        let amount = parseInt(this.getSearchParameter('amount'));
         if (isNaN(amount) || amount <= 1){ amount = 15; }
         const partners = this._getPermutation(amount);
 
@@ -160,11 +164,19 @@ export class Artist {
     }
 
     updateBehaviour(i, hasMoved){
+        if (this.getSearchParameter('no-updates')){
+            return;
+        }
+
         const timeDelta = this.loopTimestamp - this.movementChangeTimestamps[i];
         const n = 10000;
         const k = n/8;
         const changeProbability = (Math.exp(timeDelta / k) - Math.exp(1/k))/(Math.exp(n/k) - Math.exp(1/k));
         if (Math.random() > changeProbability){
+            return;
+        }
+
+        if (this.getSearchParameter('update-only-stationary') && hasMoved){
             return;
         }
 
