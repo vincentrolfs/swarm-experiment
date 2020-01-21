@@ -4,11 +4,6 @@ body {
 
 .wrapper {
     display: flex;
-    align-items: center;
     justify-content: center;
-    height: 100vh;
-}
-
-canvas {
-    border: none;
+    margin-top: 2%;
 }
