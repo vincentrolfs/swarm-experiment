@@ -1,4 +1,4 @@
-import {Vector} from "../app/artist/Vector";
+import {Vector} from "../app/SwarmSimulation/Vector";
 
 export const CANVAS_WIDTH = 750;
 export const CANVAS_HEIGHT = 750;

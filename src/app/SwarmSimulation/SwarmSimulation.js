@@ -2,7 +2,7 @@ import {Vector} from "./Vector";
 import {AGENT_RADIUS, ARENA_RADIUS, CENTER} from "../../utils/constants";
 import distinctColors from "distinct-colors/src";
 
-export class Artist {
+export class SwarmSimulation {
     constructor(canvas){
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
