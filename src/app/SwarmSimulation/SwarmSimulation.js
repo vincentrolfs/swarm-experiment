@@ -1,4 +1,4 @@
-import {Vector} from "./Vector";
+import {Vector} from "../Vector/Vector";
 import {AGENT_RADIUS, ARENA_RADIUS, CENTER} from "../../utils/constants";
 import distinctColors from "distinct-colors/src";
 import {store} from "../../redux/store";

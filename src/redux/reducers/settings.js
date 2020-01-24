@@ -8,7 +8,7 @@ const defaultSettings = {
 export const settings = (state = defaultSettings, action) => {
     switch (action.type) {
         case SET_BEHAVIOUR_UPDATE_RULE:
-            return {...state, behaviourUpdateRule: action.payload.rule};
+            return {...state, behaviourUpdateRule: action.rule};
         default:
             return state
     }
