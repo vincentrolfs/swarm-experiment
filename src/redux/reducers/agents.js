@@ -2,8 +2,9 @@ import {ADD_AGENT, RANDOMIZE_AGENT_BEHAVIOUR, REMOVE_AGENT, SET_AGENT_BEHAVIOUR,
 import {AMOUNT_DEFAULT_AGENTS, AMOUNT_DISTINCT_COLORS, ARENA_RADIUS} from "../../utils/constants";
 import distinctColors from "distinct-colors";
 import update from 'immutability-helper';
+import {store} from "../store";
 
-let highestAgentId = 1;
+let highestAgentId;
 const colors = distinctColors({ count: AMOUNT_DISTINCT_COLORS }).map(c => c.hex());
 const defaultAgents = createDefaultAgents();
 
@@ -67,6 +68,10 @@ function pickForeignId(myId, allIds) {
 }
 
 function createAgentSpec() {
+    if (!highestAgentId){
+        highestAgentId = Math.max(...store.getState().agents.map(a => parseInt(a.id))) || 1;
+    }
+
     const id = (highestAgentId++).toString();
     const partner_id = null;
     const behaviour = getRandomBehaviour();

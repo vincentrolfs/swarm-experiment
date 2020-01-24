@@ -4,7 +4,7 @@ import {useDispatch} from "react-redux";
 import {removeAgent, setAgentBehaviour, setPartnerId} from "../../redux/actions";
 import './Agent.css';
 import Button from "react-bootstrap/Button";
-import Octicon, {Plus, Trashcan} from "@primer/octicons-react";
+import Octicon, {Trashcan} from "@primer/octicons-react";
 
 export const Agent = ({allAgents, agent}) => {
     const dispatch = useDispatch();
@@ -26,7 +26,7 @@ export const Agent = ({allAgents, agent}) => {
         (event) => {
             const inputInt = parseFloat(event.target.value)
 
-            if (isNaN(inputInt) || inputInt <= 0){
+            if (isNaN(inputInt) || inputInt <= 0) {
                 return;
             }
 
@@ -41,7 +41,7 @@ export const Agent = ({allAgents, agent}) => {
 
     return (
         <tr key={agent.id}>
-            <td>#{agent.id} <span className="colorIndictaor" style={{background: agent.color}}/> </td>
+            <td>#{agent.id} <span className="colorIndictaor" style={{background: agent.color}}/></td>
             <td>
                 <Form.Control as="select" defaultValue={agent.partner_id || ""} onChange={onSetpartner_id}>
                     <option value={""} key={null} className="emptyOption">No partner</option>
@@ -51,7 +51,7 @@ export const Agent = ({allAgents, agent}) => {
                 </Form.Control>
             </td>
             <td>
-                <Form.Control value={Math.abs(agent.behaviour)} onChange={onSetBehaviourMagnitude} />
+                <Form.Control value={Math.abs(agent.behaviour)} onChange={onSetBehaviourMagnitude}/>
             </td>
             <td>
                 <Form.Control as="select" value={Math.sign(agent.behaviour)} onChange={onSetBehaviourSign}>

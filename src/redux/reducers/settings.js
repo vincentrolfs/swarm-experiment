@@ -2,7 +2,7 @@ import { behaviourUpdateRules } from "../constants/settings";
 import {SET_BEHAVIOUR_UPDATE_RULE} from "../actions";
 
 const defaultSettings = {
-    behaviourUpdateRule: behaviourUpdateRules.ALL
+    behaviourUpdateRule: behaviourUpdateRules.NEVER
 };
 
 export const settings = (state = defaultSettings, action) => {

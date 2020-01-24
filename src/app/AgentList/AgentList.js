@@ -41,5 +41,5 @@ export const AgentList = () => {
 const useAgentsArray = () => {
     const agents = useSelector(state => state.agents);
 
-    return sortBy(Object.values(agents), 'id');
+    return sortBy(Object.values(agents), (agent) => parseInt(agent.id));
 };
