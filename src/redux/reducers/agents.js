@@ -2,26 +2,16 @@ import {ADD_AGENT, RANDOMIZE_AGENT_BEHAVIOUR, REMOVE_AGENT, SET_AGENT_BEHAVIOUR,
 import {AMOUNT_DEFAULT_AGENTS, AMOUNT_DISTINCT_COLORS, ARENA_RADIUS} from "../../utils/constants";
 import distinctColors from "distinct-colors";
 import update from 'immutability-helper';
-import {store} from "../store";
 
-let highestAgentId;
+let nextAgentId = 1;
 const colors = distinctColors({ count: AMOUNT_DISTINCT_COLORS }).map(c => c.hex());
 const defaultAgents = createDefaultAgents();
 
-function computeRemoveAgent(agents, agent_id) {
-    const newAgents = {...agents};
-    delete newAgents[agent_id];
-
-    for (let id in newAgents){
-        if (!newAgents.hasOwnProperty(id)){ continue; }
-
-        if (newAgents[id].partner_id === agent_id){
-            newAgents[id].partner_id = null;
-        }
+export const determineHighestAgentId = (agents) => {
+    if (agents) {
+        nextAgentId = 1 + Math.max(...Object.values(agents).map(a => parseInt(a.id))) || 1;
     }
-
-    return newAgents;
-}
+};
 
 export const agents = (state = defaultAgents, action) => {
     switch (action.type) {
@@ -68,11 +58,7 @@ function pickForeignId(myId, allIds) {
 }
 
 function createAgentSpec() {
-    if (!highestAgentId){
-        highestAgentId = Math.max(...store.getState().agents.map(a => parseInt(a.id))) || 1;
-    }
-
-    const id = (highestAgentId++).toString();
+    const id = (nextAgentId++).toString();
     const partner_id = null;
     const behaviour = getRandomBehaviour();
     const color = colors[id % colors.length];
@@ -82,4 +68,19 @@ function createAgentSpec() {
 
 function getRandomBehaviour() {
     return Math.random() * 4 * ARENA_RADIUS - 2 * ARENA_RADIUS
+}
+
+function computeRemoveAgent(agents, agent_id) {
+    const newAgents = {...agents};
+    delete newAgents[agent_id];
+
+    for (let id in newAgents){
+        if (!newAgents.hasOwnProperty(id)){ continue; }
+
+        if (newAgents[id].partner_id === agent_id){
+            newAgents[id].partner_id = null;
+        }
+    }
+
+    return newAgents;
 }
