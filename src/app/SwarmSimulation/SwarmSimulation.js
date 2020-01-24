@@ -1,6 +1,8 @@
 import {Vector} from "./Vector";
 import {AGENT_RADIUS, ARENA_RADIUS, CENTER} from "../../utils/constants";
 import distinctColors from "distinct-colors/src";
+import {store} from "../../redux/store";
+import {behaviourUpdateRules} from "../../redux/constants/settings";
 
 export class SwarmSimulation {
     constructor(canvas){
@@ -28,7 +30,7 @@ export class SwarmSimulation {
 
     initBehaviours(){
         let amount = parseInt(this.getSearchParameter('amount'));
-        if (isNaN(amount) || amount <= 1){ amount = 30; }
+        if (isNaN(amount) || amount <= 1){ amount = 15; }
         const partners = this._getPermutation(amount);
 
         for (let i = 0; i < amount; i++){
@@ -164,7 +166,13 @@ export class SwarmSimulation {
     }
 
     updateBehaviour(i, hasMoved){
-        if (this.getSearchParameter('no-updates')){
+        const behaviourResetRule = store.getState().settings.behaviourResetRule;
+
+        if (behaviourResetRule === behaviourUpdateRules.NEVER){
+            return;
+        }
+
+        if (behaviourResetRule === behaviourUpdateRules.ONLY_STATIONARY && hasMoved){
             return;
         }
 
@@ -172,11 +180,8 @@ export class SwarmSimulation {
         const n = 10000;
         const k = n/8;
         const changeProbability = (Math.exp(timeDelta / k) - Math.exp(1/k))/(Math.exp(n/k) - Math.exp(1/k));
-        if (Math.random() > changeProbability){
-            return;
-        }
 
-        if (this.getSearchParameter('update-only-stationary') && hasMoved){
+        if (Math.random() > changeProbability){
             return;
         }
 

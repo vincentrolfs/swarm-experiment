@@ -1,7 +1,7 @@
-import { ALL } from "../constants/behaviourResetRules";
+import { behaviourUpdateRules } from "../constants/settings";
 
 const defaultSettings = {
-    behaviourResetRule: ALL
+    behaviourResetRule: behaviourUpdateRules.ALL
 };
 
 export const settings = (state = defaultSettings, action) => {
