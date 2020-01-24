@@ -18,10 +18,10 @@ export const AgentList = () => {
             </thead>
             <tbody>
                 {agents.map(agent => (
-                    <tr>
+                    <tr key={agent.id}>
                         <td>#{agent.id}</td>
                         <td>#{agent.partnerId}</td>
-                        <td>{Math.abs(agent.behaviour)}</td>
+                        <td>{Math.abs(agent.behaviour).toFixed(2)}</td>
                         <td>{Math.sign(agent.behaviour) === 1 ? "Get close" : "Stay away"}</td>
                     </tr>
                 ))}

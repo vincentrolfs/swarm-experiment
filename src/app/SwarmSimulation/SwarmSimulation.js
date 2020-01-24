@@ -1,114 +1,71 @@
 import {Vector} from "../Vector/Vector";
 import {AGENT_RADIUS, ARENA_RADIUS, CENTER} from "../../utils/constants";
-import distinctColors from "distinct-colors/src";
 import {store} from "../../redux/store";
 import {behaviourUpdateRules} from "../../redux/constants/settings";
+import {randomizeAgentBehaviour} from "../../redux/actions";
 
 export class SwarmSimulation {
-    constructor(canvas){
+    constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
 
-        this.behaviours = [];
-        this.positions = [];
-        this.colors = [];
+        this.agents = {};
+        this.positions = {};
+        this.movementChangeTimestamps = {};
+        this.hasMovedLastUpdate = {};
+        this.loopCounter = 1;
 
-        this.initBehaviours();
-        this.initPositions();
-        this.initColors();
-
-        this.movementChangeTimestamps = new Array(this.behaviours.length).fill(0);
-        this.hasMovedLastUpdate = new Array(this.behaviours.length).fill(false);
-        this.loopTimestamp = 1;
+        this.loopInterval = null;
 
         this.runLoop();
     }
 
-    getSearchParameter(name){
-        return new URL(window.location.href).searchParams.get(name);
-    }
-
-    initBehaviours(){
-        let amount = parseInt(this.getSearchParameter('amount'));
-        if (isNaN(amount) || amount <= 1){ amount = 15; }
-        const partners = this._getPermutation(amount);
-
-        for (let i = 0; i < amount; i++){
-            // const partner = (i+1) % amount;
-            let partner = partners[i];
-            do { partner = Math.floor(Math.random() * amount); } while (partner === i);
-            partners[i] = partner;
-            const rule = this.getRandomBehaviourRule();
-
-            this.behaviours.push([partner, rule])
-        }
-
-        this.logCycles(partners);
-    }
-
-    logCycles(partners) {
-        console.log("Cycles:");
-
-        for (let k = 0; k < partners.length; k++){
-            let arr = [];
-            let val = k;
-            do {
-                if (arr.indexOf(val) !== -1){ arr.push(val); break; }
-                arr.push(val);
-                val = partners[val];
-            } while(val !== k);
-
-            console.log(k, arr);
-        }
-    }
-
-    _getPermutation(length) {
-        const numbers = [...Array(length).keys()];
-
-        for (let i = numbers.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
-        }
-
-        return numbers;
-    }
-
-    getRandomBehaviourRule(){
-        return Math.random()*4*ARENA_RADIUS - 2*ARENA_RADIUS;
-    }
-
-    initPositions(){
-        this.behaviours.forEach(() => this.positions.push(new Vector()));
-    }
-
-    initColors(){
-        this.colors = distinctColors({count: this.positions.length}).map(c => c.hex());
-    }
-
     runLoop() {
-        setInterval(() => {
-            this.draw();
-            this.updatePositions();
-            this.loopTimestamp++;
+        this.loadAgents();
+        this.draw();
+
+        this.loopInterval = setInterval(() => {
+            try {
+                this.draw();
+                this.loadAgents();
+                this.updatePositions();
+                this.loopCounter++;
+            } catch (e) {
+                clearInterval(this.loopInterval);
+                throw e;
+            }
         }, 5)
     }
 
-    draw(){
+    draw() {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawArena();
 
-        for (let i = 0; i < this.positions.length; i++){
-            this.drawAgent(i);
+        for (let id in this.positions) {
+            this.drawAgent(id);
         }
     }
 
-    drawAgent(i){
-        const { ctx } = this;
-        const { x, y } = this.positions[i];
-        const color = this.colors[i];
-        const partnerColor = this.colors[this.behaviours[i][0]];
-        const partnerRelationshipGood = 1 === Math.sign(this.behaviours[i][1]);
+    drawArena() {
+        this.ctx.beginPath();
+        this.ctx.arc(CENTER.x, CENTER.y, ARENA_RADIUS, 0, 2 * Math.PI, false);
+        this.ctx.lineWidth = 8;
+
+        const grd = this.ctx.createRadialGradient(CENTER.x, CENTER.y, ARENA_RADIUS, CENTER.x, CENTER.y, ARENA_RADIUS + 50);
+
+        grd.addColorStop(0, 'black');
+        grd.addColorStop(.2, 'white');
+        this.ctx.strokeStyle = grd;
+        this.ctx.stroke();
+    }
+
+    drawAgent(id) {
+        const {ctx} = this;
+        const {x, y} = this.positions[id];
+        const color = this.agents[id].color;
+        const partnerColor = this.agents[this.agents[id].partnerId].color;
+        const partnerRelationshipGood = 1 === Math.sign(this.agents[id].behaviour);
 
         ctx.beginPath();
         ctx.arc(x, y, AGENT_RADIUS, 0, 2 * Math.PI, false);
@@ -124,90 +81,99 @@ export class SwarmSimulation {
         ctx.fill();
     }
 
-    drawArena(){
-        this.ctx.beginPath();
-        this.ctx.arc(CENTER.x, CENTER.y, ARENA_RADIUS, 0, 2 * Math.PI, false);
-        this.ctx.lineWidth = 8;
+    loadAgents() {
+        this.agents = store.getState().agents;
 
-        const grd = this.ctx.createRadialGradient(CENTER.x, CENTER.y, ARENA_RADIUS, CENTER.x, CENTER.y, ARENA_RADIUS + 50);
+        for (let id in this.agents) {
+            if (!this.positions.hasOwnProperty(id)) {
+                this.positions[id] = new Vector();
+                this.movementChangeTimestamps[id] = 0;
+                this.hasMovedLastUpdate[id] = false;
+            }
+        }
 
-        grd.addColorStop(0, 'black');
-        grd.addColorStop(.2, 'white');
-        this.ctx.strokeStyle = grd;
-        this.ctx.stroke();
+        for (let id in this.positions) {
+            if (!this.agents.hasOwnProperty(id)) {
+                delete this.positions[id];
+                delete this.movementChangeTimestamps[id];
+                delete this.hasMovedLastUpdate[id];
+            }
+        }
     }
 
-    updatePositions(){
-        const {positions, behaviours} = this;
+    updatePositions() {
+        const {positions, agents} = this;
         const newPositions = [];
 
-        for (let i = 0; i < positions.length; i++){
-            if (!behaviours[i]){ continue; }
+        for (let id in agents) {
+            const agent = agents[id];
+            if (!agent.partnerId) {
+                continue;
+            }
 
-            const myPosition = positions[i];
-            const partnerPosition = positions[behaviours[i][0]];
-            const goalDistance = behaviours[i][1];
+            const myPosition = positions[id];
+            const partnerPosition = positions[agent.partnerId];
+            const goalDistance = agent.behaviour;
 
             const [newPosition, hasMoved] = this.findNewPosition(myPosition, partnerPosition, goalDistance);
-            newPositions[i] = newPosition;
+            newPositions[id] = newPosition;
 
-            this.updateHasMovedLastUpdate(i, hasMoved);
-            this.updateBehaviour(i, hasMoved);
+            this.updateHasMovedLastUpdate(id, hasMoved);
+            this.updateBehaviour(id, hasMoved);
         }
 
         this.positions = newPositions;
     }
 
-    updateHasMovedLastUpdate(i, hasMoved) {
-        if (this.hasMovedLastUpdate[i] !== hasMoved){
-            this.movementChangeTimestamps[i] = this.loopTimestamp;
-            this.hasMovedLastUpdate[i] = hasMoved;
+    updateHasMovedLastUpdate(id, hasMoved) {
+        if (this.hasMovedLastUpdate[id] !== hasMoved) {
+            this.movementChangeTimestamps[id] = this.loopCounter;
+            this.hasMovedLastUpdate[id] = hasMoved;
         }
     }
 
-    updateBehaviour(i, hasMoved){
+    updateBehaviour(id, hasMoved) {
         const behaviourUpdateRule = store.getState().settings.behaviourUpdateRule;
-        if (Math.random() <= 0.001){
-            console.log(behaviourUpdateRule);
-        }
 
-        if (behaviourUpdateRule === behaviourUpdateRules.NEVER){
+        if (behaviourUpdateRule === behaviourUpdateRules.NEVER) {
             return;
         }
 
-        if (behaviourUpdateRule === behaviourUpdateRules.ONLY_STATIONARY && hasMoved){
+        if (behaviourUpdateRule === behaviourUpdateRules.ONLY_STATIONARY && hasMoved) {
             return;
         }
 
-        const timeDelta = this.loopTimestamp - this.movementChangeTimestamps[i];
+        const timeDelta = this.loopCounter - this.movementChangeTimestamps[id];
         const n = 10000;
-        const k = n/8;
-        const changeProbability = (Math.exp(timeDelta / k) - Math.exp(1/k))/(Math.exp(n/k) - Math.exp(1/k));
+        const k = n / 8;
+        const changeProbability = (Math.exp(timeDelta / k) - Math.exp(1 / k)) / (Math.exp(n / k) - Math.exp(1 / k));
 
-        if (Math.random() > changeProbability){
+        if (Math.random() > changeProbability) {
             return;
         }
 
-        this.behaviours[i][1] = this.getRandomBehaviourRule();
+        store.dispatch(randomizeAgentBehaviour(id));
     }
 
-    findNewPosition(myPosition, partnerPosition, goalDistance){
+    findNewPosition(myPosition, partnerPosition, goalDistance) {
         const directionMultiplier = this.findDirectionMultiplier(myPosition, partnerPosition, goalDistance);
-        if (directionMultiplier === 0){ return [myPosition, false]; }
+        if (directionMultiplier === 0) {
+            return [myPosition, false];
+        }
 
         const direction = partnerPosition.subtract(myPosition).multiply(directionMultiplier);
 
         return [myPosition.moveUniform(direction), true];
     }
 
-    findDirectionMultiplier(myPosition, partnerPosition, goalDistance){
+    findDirectionMultiplier(myPosition, partnerPosition, goalDistance) {
         const currentDistance = myPosition.distance(partnerPosition);
         const goalDistanceSign = Math.sign(goalDistance);
 
-        if (goalDistanceSign > 0){
+        if (goalDistanceSign > 0) {
             goalDistance = 2 * ARENA_RADIUS - goalDistance;
         }
 
-        return (goalDistanceSign * currentDistance > goalDistance)? goalDistanceSign : 0;
+        return (goalDistanceSign * currentDistance > goalDistance) ? goalDistanceSign : 0;
     }
 }

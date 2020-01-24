@@ -71,7 +71,7 @@ const intersectTwoCircles = (pos1, r1, pos2, r2) => {
     var centerdy = y1 - y2;
     var R = Math.sqrt(centerdx * centerdx + centerdy * centerdy);
     if (!(Math.abs(r1 - r2) <= R && R <= r1 + r2)) { // no intersection
-        return []; // empty list of results
+        throw new Error("No intersection: " + [x1, y1, r1, x2, y2, r2]);
     }
     // intersection(s) should exist
 
