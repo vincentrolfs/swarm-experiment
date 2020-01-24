@@ -2,6 +2,7 @@ import Table from "react-bootstrap/Table";
 import React from "react";
 import {useSelector} from "react-redux";
 import { sortBy } from "lodash/collection";
+import {Agent} from "./Agent";
 
 export const AgentList = () => {
     const agents = useAgentsArray();
@@ -18,12 +19,7 @@ export const AgentList = () => {
             </thead>
             <tbody>
                 {agents.map(agent => (
-                    <tr key={agent.id}>
-                        <td>#{agent.id}</td>
-                        <td>#{agent.partnerId}</td>
-                        <td>{Math.abs(agent.behaviour).toFixed(2)}</td>
-                        <td>{Math.sign(agent.behaviour) === 1 ? "Get close" : "Stay away"}</td>
-                    </tr>
+                    <Agent agent={agent} allAgents={agents} key={agent.id}/>
                 ))}
             </tbody>
         </Table>

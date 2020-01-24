@@ -1,4 +1,4 @@
-import {ADD_AGENT, RANDOMIZE_AGENT_BEHAVIOUR, SET_AGENT_BEHAVIOUR} from "../actions";
+import {ADD_AGENT, RANDOMIZE_AGENT_BEHAVIOUR, SET_AGENT_BEHAVIOUR, SET_PARTNER_ID} from "../actions";
 import {AMOUNT_DEFAULT_AGENTS, AMOUNT_DISTINCT_COLORS, ARENA_RADIUS} from "../../utils/constants";
 import distinctColors from "distinct-colors";
 import update from 'immutability-helper';
@@ -15,6 +15,8 @@ export const agents = (state = defaultAgents, action) => {
             return update(state, { [action.agent_id] : { behaviour: { $set: action.behaviour } } });
         case RANDOMIZE_AGENT_BEHAVIOUR:
             return update(state, { [action.agent_id] : { behaviour: { $set: getRandomBehaviour() } } });
+        case SET_PARTNER_ID:
+            return update(state, { [action.agent_id] : { partnerId: { $set: action.partner_id || null } } });
         default:
             return state
     }
@@ -38,18 +40,17 @@ function createDefaultAgents() {
 }
 
 function pickForeignId(myId, allIds) {
-    myId = parseInt(myId);
     let foreignId;
 
     do {
-        foreignId = parseInt(allIds[parseInt(Math.random() * allIds.length)]);
+        foreignId = allIds[parseInt(Math.random() * allIds.length)];
     } while (foreignId === myId);
 
     return foreignId;
 }
 
 function createAgentSpec() {
-    const id = highestAgentId++;
+    const id = (highestAgentId++).toString();
     const partnerId = null;
     const behaviour = getRandomBehaviour();
     const color = colors[id % colors.length];

@@ -8,5 +8,5 @@ export const AGENT_RADIUS = 20;
 
 export const CENTER = new Vector(CANVAS_WIDTH / 2.0, CANVAS_HEIGHT / 2.0);
 
-export const AMOUNT_DEFAULT_AGENTS = 15;
+export const AMOUNT_DEFAULT_AGENTS = 2;
 export const AMOUNT_DISTINCT_COLORS = 50;

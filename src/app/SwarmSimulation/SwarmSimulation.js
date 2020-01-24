@@ -42,7 +42,7 @@ export class SwarmSimulation {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawArena();
 
-        for (let id in this.positions) {
+        for (let id in this.agents) {
             this.drawAgent(id);
         }
     }
@@ -64,7 +64,8 @@ export class SwarmSimulation {
         const {ctx} = this;
         const {x, y} = this.positions[id];
         const color = this.agents[id].color;
-        const partnerColor = this.agents[this.agents[id].partnerId].color;
+        const partnerId = this.agents[id].partnerId;
+        const partnerColor = partnerId && this.agents[partnerId].color;
         const partnerRelationshipGood = 1 === Math.sign(this.agents[id].behaviour);
 
         ctx.beginPath();
@@ -72,13 +73,15 @@ export class SwarmSimulation {
         ctx.fillStyle = color;
         ctx.fill();
 
-        ctx.font = '15px serif';
-        ctx.fillText(partnerRelationshipGood ? '❤️' : '🔥', x + 10, y - 10);
+        if (partnerId){
+            ctx.font = '15px serif';
+            ctx.fillText(partnerRelationshipGood ? '❤️' : '🔥', x + 10, y - 10);
 
-        ctx.beginPath();
-        ctx.arc(x + AGENT_RADIUS / 3, y + AGENT_RADIUS / 3, AGENT_RADIUS / 3, 0, 2 * Math.PI, false);
-        ctx.fillStyle = partnerColor;
-        ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + AGENT_RADIUS / 3, y + AGENT_RADIUS / 3, AGENT_RADIUS / 3, 0, 2 * Math.PI, false);
+            ctx.fillStyle = partnerColor;
+            ctx.fill();
+        }
     }
 
     loadAgents() {
@@ -86,9 +89,11 @@ export class SwarmSimulation {
 
         for (let id in this.agents) {
             if (!this.positions.hasOwnProperty(id)) {
+                console.log(1, this.agents, this.positions);
                 this.positions[id] = new Vector();
                 this.movementChangeTimestamps[id] = 0;
                 this.hasMovedLastUpdate[id] = false;
+                console.log(2, this.agents, this.positions);
             }
         }
 
@@ -103,7 +108,7 @@ export class SwarmSimulation {
 
     updatePositions() {
         const {positions, agents} = this;
-        const newPositions = [];
+        const newPositions = {...positions};
 
         for (let id in agents) {
             const agent = agents[id];

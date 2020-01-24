@@ -1,0 +1,10 @@
+.colorIndictaor {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    display: inline-block;
+}
+
+.emptyOption {
+    font-style: italic;
+}

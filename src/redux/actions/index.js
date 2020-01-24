@@ -21,3 +21,10 @@ export const randomizeAgentBehaviour = (agent_id) => ({
     type: RANDOMIZE_AGENT_BEHAVIOUR,
     agent_id
 });
+
+export const SET_PARTNER_ID = 'SET_PARTNER_ID';
+export const setPartnerId = (agent_id, partner_id) => ({
+    type: SET_PARTNER_ID,
+    agent_id,
+    partner_id
+});
