@@ -1,4 +1,4 @@
-import {ADD_AGENT, RANDOMIZE_AGENT_BEHAVIOUR, SET_AGENT_BEHAVIOUR, SET_PARTNER_ID} from "../actions";
+import {ADD_AGENT, RANDOMIZE_AGENT_BEHAVIOUR, REMOVE_AGENT, SET_AGENT_BEHAVIOUR, SET_PARTNER_ID} from "../actions";
 import {AMOUNT_DEFAULT_AGENTS, AMOUNT_DISTINCT_COLORS, ARENA_RADIUS} from "../../utils/constants";
 import distinctColors from "distinct-colors";
 import update from 'immutability-helper';
@@ -6,6 +6,21 @@ import update from 'immutability-helper';
 let highestAgentId = 1;
 const colors = distinctColors({ count: AMOUNT_DISTINCT_COLORS }).map(c => c.hex());
 const defaultAgents = createDefaultAgents();
+
+function computeRemoveAgent(agents, agent_id) {
+    const newAgents = {...agents};
+    delete newAgents[agent_id];
+
+    for (let id in newAgents){
+        if (!newAgents.hasOwnProperty(id)){ continue; }
+
+        if (newAgents[id].partner_id === agent_id){
+            newAgents[id].partner_id = null;
+        }
+    }
+
+    return newAgents;
+}
 
 export const agents = (state = defaultAgents, action) => {
     switch (action.type) {
@@ -16,7 +31,9 @@ export const agents = (state = defaultAgents, action) => {
         case RANDOMIZE_AGENT_BEHAVIOUR:
             return update(state, { [action.agent_id] : { behaviour: { $set: getRandomBehaviour() } } });
         case SET_PARTNER_ID:
-            return update(state, { [action.agent_id] : { partnerId: { $set: action.partner_id || null } } });
+            return update(state, { [action.agent_id] : { partner_id: { $set: action.partner_id || null } } });
+        case REMOVE_AGENT:
+            return computeRemoveAgent(state, action.agent_id);
         default:
             return state
     }
@@ -33,7 +50,7 @@ function createDefaultAgents() {
 
     allIds.forEach(function (id) {
         const agent = defaultAgents[id];
-        agent.partnerId = pickForeignId(id, allIds);
+        agent.partner_id = pickForeignId(id, allIds);
     });
 
     return defaultAgents;
@@ -51,11 +68,11 @@ function pickForeignId(myId, allIds) {
 
 function createAgentSpec() {
     const id = (highestAgentId++).toString();
-    const partnerId = null;
+    const partner_id = null;
     const behaviour = getRandomBehaviour();
     const color = colors[id % colors.length];
 
-    return {[id]: {id, partnerId, behaviour, color}}
+    return {[id]: {id, partner_id, behaviour, color}}
 }
 
 function getRandomBehaviour() {

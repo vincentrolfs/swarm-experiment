@@ -28,3 +28,9 @@ export const setPartnerId = (agent_id, partner_id) => ({
     agent_id,
     partner_id
 });
+
+export const REMOVE_AGENT = 'REMOVE_AGENT';
+export const removeAgent = (agent_id) => ({
+    type: REMOVE_AGENT,
+    agent_id
+});

@@ -64,8 +64,8 @@ export class SwarmSimulation {
         const {ctx} = this;
         const {x, y} = this.positions[id];
         const color = this.agents[id].color;
-        const partnerId = this.agents[id].partnerId;
-        const partnerColor = partnerId && this.agents[partnerId].color;
+        const partner_id = this.agents[id].partner_id;
+        const partnerColor = partner_id && this.agents[partner_id].color;
         const partnerRelationshipGood = 1 === Math.sign(this.agents[id].behaviour);
 
         ctx.beginPath();
@@ -73,7 +73,7 @@ export class SwarmSimulation {
         ctx.fillStyle = color;
         ctx.fill();
 
-        if (partnerId){
+        if (partner_id){
             ctx.font = '15px serif';
             ctx.fillText(partnerRelationshipGood ? '❤️' : '🔥', x + 10, y - 10);
 
@@ -89,11 +89,9 @@ export class SwarmSimulation {
 
         for (let id in this.agents) {
             if (!this.positions.hasOwnProperty(id)) {
-                console.log(1, this.agents, this.positions);
                 this.positions[id] = new Vector();
                 this.movementChangeTimestamps[id] = 0;
                 this.hasMovedLastUpdate[id] = false;
-                console.log(2, this.agents, this.positions);
             }
         }
 
@@ -112,12 +110,12 @@ export class SwarmSimulation {
 
         for (let id in agents) {
             const agent = agents[id];
-            if (!agent.partnerId) {
+            if (!agent.partner_id) {
                 continue;
             }
 
             const myPosition = positions[id];
-            const partnerPosition = positions[agent.partnerId];
+            const partnerPosition = positions[agent.partner_id];
             const goalDistance = agent.behaviour;
 
             const [newPosition, hasMoved] = this.findNewPosition(myPosition, partnerPosition, goalDistance);
@@ -174,10 +172,6 @@ export class SwarmSimulation {
     findDirectionMultiplier(myPosition, partnerPosition, goalDistance) {
         const currentDistance = myPosition.distance(partnerPosition);
         const goalDistanceSign = Math.sign(goalDistance);
-
-        if (goalDistanceSign > 0) {
-            goalDistance = 2 * ARENA_RADIUS - goalDistance;
-        }
 
         return (goalDistanceSign * currentDistance > goalDistance) ? goalDistanceSign : 0;
     }
