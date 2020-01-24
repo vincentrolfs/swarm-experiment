@@ -1,6 +1,7 @@
 import {ADD_AGENT} from "../actions";
 import {AMOUNT_DEFAULT_AGENTS, ARENA_RADIUS} from "../../utils/constants";
-import {uuid} from "../../utils/utils";
+
+let highestAgentId = 1;
 
 const defaultAgents = createDefaultAgents();
 
@@ -16,13 +17,13 @@ export const agents = (state = defaultAgents, action) => {
 function createDefaultAgents() {
     let defaultAgents = {};
 
-    for (let i = 0; i < AMOUNT_DEFAULT_AGENTS; i++){
+    for (let i = 0; i < AMOUNT_DEFAULT_AGENTS; i++) {
         defaultAgents = {...defaultAgents, ...createAgentSpec()};
     }
 
     const allIds = Object.keys(defaultAgents);
 
-    allIds.forEach(function(id){
+    allIds.forEach(function (id) {
         const agent = defaultAgents[id];
         agent.partnerId = pickForeignid(id, allIds);
     });
@@ -30,7 +31,7 @@ function createDefaultAgents() {
     return defaultAgents;
 }
 
-function pickForeignid(myId, allIds){
+function pickForeignid(myId, allIds) {
     let foreignId;
 
     do {
@@ -41,13 +42,13 @@ function pickForeignid(myId, allIds){
 }
 
 function createAgentSpec() {
-    const id = uuid();
+    const id = highestAgentId++;
     const partnerId = null;
     const behaviour = getRandomBehaviour();
 
-    return { [id]: { id, partnerId, behaviour }}
+    return {[id]: {id, partnerId, behaviour}}
 }
 
 function getRandomBehaviour() {
-    return Math.random()*4*ARENA_RADIUS - 2*ARENA_RADIUS
+    return Math.random() * 4 * ARENA_RADIUS - 2 * ARENA_RADIUS
 }
