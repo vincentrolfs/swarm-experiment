@@ -166,13 +166,16 @@ export class SwarmSimulation {
     }
 
     updateBehaviour(i, hasMoved){
-        const behaviourResetRule = store.getState().settings.behaviourResetRule;
+        const behaviourUpdateRule = store.getState().settings.behaviourUpdateRule;
+        if (Math.random() <= 0.001){
+            console.log(behaviourUpdateRule);
+        }
 
-        if (behaviourResetRule === behaviourUpdateRules.NEVER){
+        if (behaviourUpdateRule === behaviourUpdateRules.NEVER){
             return;
         }
 
-        if (behaviourResetRule === behaviourUpdateRules.ONLY_STATIONARY && hasMoved){
+        if (behaviourUpdateRule === behaviourUpdateRules.ONLY_STATIONARY && hasMoved){
             return;
         }
 

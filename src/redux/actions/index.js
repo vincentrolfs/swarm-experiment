@@ -1,6 +1,6 @@
-export const SET_BEHAVIOUR_RESET_RULE = 'SET_BEHAVIOUR_RESET_RULE';
-export const setBehaviourResetRule = rule => ({
-    type: SET_BEHAVIOUR_RESET_RULE,
+export const SET_BEHAVIOUR_UPDATE_RULE = 'SET_BEHAVIOUR_UPDATE_RULE';
+export const setBehaviourUpdateRule = rule => ({
+    type: SET_BEHAVIOUR_UPDATE_RULE,
     payload: {
         rule
     }

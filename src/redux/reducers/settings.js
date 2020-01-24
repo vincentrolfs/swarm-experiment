@@ -1,13 +1,14 @@
 import { behaviourUpdateRules } from "../constants/settings";
+import {SET_BEHAVIOUR_UPDATE_RULE} from "../actions";
 
 const defaultSettings = {
-    behaviourResetRule: behaviourUpdateRules.ALL
+    behaviourUpdateRule: behaviourUpdateRules.ALL
 };
 
 export const settings = (state = defaultSettings, action) => {
     switch (action.type) {
-        case 'SET_BEHAVIOUR_RESET_RULE':
-            return {...state, behaviourResetRule: action.rule};
+        case SET_BEHAVIOUR_UPDATE_RULE:
+            return {...state, behaviourUpdateRule: action.payload.rule};
         default:
             return state
     }
